@@ -1,6 +1,5 @@
 import UserModel from "./User.model";
 import bcrypt from "bcrypt";
-import { ERROR_MESSAGES } from "../constants/messages";
 import { generateToken } from "../utils/token";
 
 export const signup = (payload: any) => {
@@ -11,25 +10,10 @@ export const signup = (payload: any) => {
 };
 
 export const login = async (payload: any) => {
-  //already verified payload
-
-  // find user
   const userDoc: any = await UserModel.findOne({ email: payload.email });
 
-  if (userDoc) {
-    const hashedPassword = userDoc.password;
-    const matchPassword = bcrypt.compareSync(payload.password, hashedPassword);
-    if (matchPassword) {
-      const token = generateToken(payload);
-
-      return token;
-    }
-    return null;
-  } else {
+  if (!(userDoc && bcrypt.compareSync(payload.password, userDoc.password))) {
     return null;
   }
-
-  // compare password using bcrypt
-
-  //
+  return generateToken(payload);
 };
